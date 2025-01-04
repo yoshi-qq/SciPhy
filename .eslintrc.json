@@ -1,0 +1,63 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "semi": true,
+        "singleQuote": false,
+        "tabWidth": 2,
+        "useTabs": false,
+        "printWidth": 80,
+        "trailingComma": "es5",
+        "endOfLine": "auto"
+      }
+    ],
+    "semi": ["error", "always"],                     // Require semicolons
+    "indent": ["error", 2],                          // Enforce 2-space indentation
+    "quotes": ["error", "double"],                   // Enforce double quotes
+    "eol-last": ["error", "always"],                 // Require newline at end of files
+    "no-trailing-spaces": "error",                   // Disallow trailing spaces
+    "@typescript-eslint/no-unused-vars": ["error"],  // No unused variables
+    "@typescript-eslint/explicit-function-return-type": "warn", // Warn if no return type
+    "@typescript-eslint/member-delimiter-style": [
+      "error",
+      {
+        "multiline": {
+          "delimiter": "semi",
+          "requireLast": true
+        },
+        "singleline": {
+          "delimiter": "semi",
+          "requireLast": false
+        }
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "warn",    // Discourage use of 'any'
+    "@typescript-eslint/consistent-type-definitions": ["error", "interface"], // Prefer interfaces
+    "no-console": "warn",                            // Warn on console.log statements
+    "no-debugger": "error"                           // Disallow debugger statements
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/"
+  ]
+}
