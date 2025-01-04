@@ -19,6 +19,7 @@ enum SISymbol {
 enum Symbol {
   F = "F", // force
   f = "f", // frequency
+  U = "U", // electric current
   X = "X", // unknown
 }
 
@@ -138,6 +139,7 @@ const unitIdentifiers = [
   new UnitIdentifier(new Unit(new Map([[SI.J, 1]])), SI.J, "cd", language === "DE" ? "Candela" : "candela", language === "DE" ? "Candela" : "candelas"), // cd
   new UnitIdentifier(new Unit(new Map([[SI.T, -1]])), SY.f, "Hz", language === "DE" ? "Hertz" : "hertz", language === "DE" ? "Hertz" : "hertz"), // Hz
   new UnitIdentifier(new Unit(new Map([[SI.M, 1], [SI.L, 1], [SI.T, -2]])), SY.F, "N", language === "DE" ? "Newton" : "newton", language === "DE" ? "Newton" : "newtons"), // N
+  new UnitIdentifier(new Unit(new Map([[SI.M, 1], [SI.L, 2], [SI.T, -3], [SI.I, -1]])), SY.U, "V", language === "DE" ? "Volt" : "volt", language === "DE" ? "Volt" : "volts"), // V
 ];
 
 function exponentiateUnitName(unitName: string, exponent: number): string {
@@ -264,9 +266,6 @@ export class Quantity {
   }
   
   multiply(quantity2: Quantity) {
-    if (!sameUnit(this.unit, quantity2.unit)) {
-      throw new Error("Cannot multiply quantities of different types");
-    }
     if (this.value instanceof Scalar && quantity2.value instanceof Scalar) {
       return new Quantity(this.unit.multiply(quantity2.unit), this.value.multiply(quantity2.value));
     } else if (this.value instanceof Vector && quantity2.value instanceof Vector) {
@@ -277,9 +276,6 @@ export class Quantity {
   }
   
   divide(quantity2: Quantity) {
-    if (!sameUnit(this.unit, quantity2.unit)) {
-      throw new Error("Cannot divide quantities of different types");
-    }
     if (this.value instanceof Scalar && quantity2.value instanceof Scalar) {
       return new Quantity(this.unit.divide(quantity2.unit), this.value.divide(quantity2.value));
     } else if (this.value instanceof Vector && quantity2.value instanceof Vector) {
