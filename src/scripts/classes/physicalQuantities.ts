@@ -529,6 +529,14 @@ function getUnitIdentifierBySymbol(symbol: SISymbol | Symbol): UnitIdentifier {
   return result;
 }
 
+function getUnitIdentifierByShorthand(shorthand: string): UnitIdentifier {
+  const result = unitIdentifiers.find((identifier) => identifier.shorthand === shorthand);
+  if (!result) {
+    throw new Error(`No unit matching shorthand ${shorthand}`);
+  }
+  return result;
+}
+
 // Helper: Check if two units are equivalent
 function sameUnit(unit1: Unit, unit2: Unit): boolean {
   const symbols1 = fixUnit(unit1).symbols;
@@ -540,6 +548,11 @@ function sameUnit(unit1: Unit, unit2: Unit): boolean {
     if (symbols2.get(key) !== value) return false;
   }
   return true;
+}
+
+export function textToUnit(text: string): Unit {
+  // TODO: add support for modifiers
+  return getUnitIdentifierByShorthand(text).unit;
 }
 
 // Helper: Remove zero exponent symbols from a unit
@@ -554,9 +567,9 @@ export class Quantity {
   unit: Unit;
   value: Vector | Scalar;
 
-  constructor(unit: Unit, value: Vector | Scalar) {
-    this.unit = unit;
-    this.value = value;
+  constructor(unit: Unit | string, value: Vector | Scalar | number) {
+    this.unit = typeof unit === "string" ? textToUnit(unit) : unit;
+    this.value = typeof(value) === "number" ? new Scalar(value) : value;
   }
   
   add(quantity2: Quantity) {
