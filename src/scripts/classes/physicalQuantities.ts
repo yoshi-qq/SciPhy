@@ -1,8 +1,5 @@
 import { invertMap } from "../utils/utilFunctions";
 
-// TODO: automatic unit conversion and one unique identifier -> Shorthand and Name only as printables and never identifiers
-
-// FIXME: add german option to names again
 const language = "DE";
 
 // Enum of the SISymbols for SI-Units
@@ -48,6 +45,7 @@ const divisionSplitter = language === "DE" ? " pro " : " per ";
 const unitlessSingular = language === "DE" ? "" : "";
 const unitlessPlural = language === "DE" ? "" : "";
 
+// basic Scalar number
 export class Scalar {
   value: number;
   constructor(value: number) {
@@ -69,6 +67,7 @@ export class Scalar {
 
 // Vector with magnitude and direction unit-vector
 export class Vector {
+  // TODO: add scalar/dot product
   magnitude: number;
   direction: Array<number>;
 
@@ -552,6 +551,7 @@ function sameUnit(unit1: Unit, unit2: Unit): boolean {
 
 export function textToUnit(text: string): Unit {
   // TODO: add support for modifiers
+  // TODO: add support for composition units
   return getUnitIdentifierByShorthand(text).unit;
 }
 
