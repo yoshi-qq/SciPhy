@@ -1,12 +1,14 @@
 import { invertMap } from "../utils/utilFunctions";
 
+// TODO: migrate everything to Scalars
+
 const language = "DE";
 
 // Enum of the SISymbols for SI-Units
 enum SISymbol {
-    T = "T", // time
-    L = "L", // length
-    M = "M", // mass
+    t = "t", // time
+    l = "l", // length
+    m = "m", // mass
     I = "I", // electric current
     Θ = "Θ", // thermodynamic temperature
     N = "N", // amount of substance
@@ -39,6 +41,8 @@ enum Symbol {
 
 export const SI = SISymbol;
 export const SY = Symbol;
+const legalNumberChars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ","];
+
 
 const multiplicationSplitter = language === "DE" ? " mal " : " times ";
 const divisionSplitter = language === "DE" ? " pro " : " per ";
@@ -126,7 +130,16 @@ export class Unit {
     }
     return newUnit;
   }
+  exponentiate(extraExponent: number) {
+    const newUnit = new Unit(new Map(this.symbols));
+    for (const [symbol, exponent] of this.symbols) {
+      newUnit.symbols.set(symbol, exponent * extraExponent);
+    }
+    return newUnit;
+  }
 }
+
+const dimensionlessUnit = new Unit(new Map([]));
 
 // Unit name in singular and plural form
 class UnitIdentifier {
@@ -145,33 +158,42 @@ class UnitIdentifier {
   }
 }
 
+class SIUnitIdentifier extends UnitIdentifier {
+  symbol: SISymbol;
+
+  constructor(unit: Unit, symbol: SISymbol, shorthand: string, singular: string, plural: string) {
+    super(unit, symbol, shorthand, singular, plural);
+    this.symbol = symbol;
+  }
+}
+
 // list of all symbols, units, and naming for each unit
-const unitIdentifiers = [
-  new UnitIdentifier(
-    new Unit(new Map([[SISymbol.T, 1]])),
-    SISymbol.T,
+const SIUnitIdentifiers = [
+  new SIUnitIdentifier(
+    new Unit(new Map([[SISymbol.t, 1]])),
+    SISymbol.t,
     "s",
     language === "DE" ? "Sekunde" : "second",
     language === "DE" ? "Sekunden" : "seconds"
   ), // s
 
-  new UnitIdentifier(
-    new Unit(new Map([[SISymbol.L, 1]])),
-    SISymbol.L,
+  new SIUnitIdentifier(
+    new Unit(new Map([[SISymbol.l, 1]])),
+    SISymbol.l,
     "m",
     language === "DE" ? "Meter" : "meter",
     language === "DE" ? "Meter" : "meters"
   ), // m
 
-  new UnitIdentifier(
-    new Unit(new Map([[SISymbol.M, 1]])),
-    SISymbol.M,
+  new SIUnitIdentifier(
+    new Unit(new Map([[SISymbol.m, 1]])),
+    SISymbol.m,
     "kg",
     language === "DE" ? "Kilogramm" : "kilogram",
     language === "DE" ? "Kilogramm" : "kilograms"
   ), // kg
 
-  new UnitIdentifier(
+  new SIUnitIdentifier(
     new Unit(new Map([[SISymbol.I, 1]])),
     SISymbol.I,
     "A",
@@ -179,7 +201,7 @@ const unitIdentifiers = [
     language === "DE" ? "Ampere" : "amperes"
   ), // A
 
-  new UnitIdentifier(
+  new SIUnitIdentifier(
     new Unit(new Map([[SISymbol.Θ, 1]])),
     SISymbol.Θ,
     "K",
@@ -187,7 +209,7 @@ const unitIdentifiers = [
     language === "DE" ? "Kelvin" : "kelvins"
   ), // K
 
-  new UnitIdentifier(
+  new SIUnitIdentifier(
     new Unit(new Map([[SISymbol.N, 1]])),
     SISymbol.N,
     "mol",
@@ -195,19 +217,18 @@ const unitIdentifiers = [
     language === "DE" ? "Mol" : "moles"
   ), // mol
 
-  new UnitIdentifier(
+  new SIUnitIdentifier(
     new Unit(new Map([[SISymbol.J, 1]])),
     SISymbol.J,
     "cd",
     language === "DE" ? "Candela" : "candela",
     language === "DE" ? "Candela" : "candelas"
   ), // cd
-
-  // Derived SI units:
-
+];
+const unitIdentifiers = [
   // Frequency: Hz = s^-1
   new UnitIdentifier(
-    new Unit(new Map([[SISymbol.T, -1]])),
+    new Unit(new Map([[SISymbol.t, -1]])),
     Symbol.f,
     "Hz",
     language === "DE" ? "Hertz" : "hertz",
@@ -217,9 +238,9 @@ const unitIdentifiers = [
   // Force: N = kg·m·s^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1], 
-      [SISymbol.L, 1], 
-      [SISymbol.T, -2]
+      [SISymbol.m, 1], 
+      [SISymbol.l, 1], 
+      [SISymbol.t, -2]
     ])),
     Symbol.F,
     "N",
@@ -230,9 +251,9 @@ const unitIdentifiers = [
   // Pressure: Pa = N/m^2 = kg·m^-1·s^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1],
-      [SISymbol.L, -1],
-      [SISymbol.T, -2]
+      [SISymbol.m, 1],
+      [SISymbol.l, -1],
+      [SISymbol.t, -2]
     ])),
     Symbol.p, 
     "Pa",
@@ -243,9 +264,9 @@ const unitIdentifiers = [
   // Energy: J = N·m = kg·m^2·s^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1], 
-      [SISymbol.L, 2], 
-      [SISymbol.T, -2]
+      [SISymbol.m, 1], 
+      [SISymbol.l, 2], 
+      [SISymbol.t, -2]
     ])),
     Symbol.E,
     "J",
@@ -256,9 +277,9 @@ const unitIdentifiers = [
   // Work: J = N·m = kg·m^2·s^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1],
-      [SISymbol.L, 2],
-      [SISymbol.T, -2]
+      [SISymbol.m, 1],
+      [SISymbol.l, 2],
+      [SISymbol.t, -2]
     ])),
     Symbol.W,
     "J", 
@@ -269,9 +290,9 @@ const unitIdentifiers = [
   // Power: W = J/s = kg·m^2·s^-3
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1], 
-      [SISymbol.L, 2], 
-      [SISymbol.T, -3]
+      [SISymbol.m, 1], 
+      [SISymbol.l, 2], 
+      [SISymbol.t, -3]
     ])),
     Symbol.P,
     "W",
@@ -283,7 +304,7 @@ const unitIdentifiers = [
   new UnitIdentifier(
     new Unit(new Map([
       [SISymbol.I, 1],
-      [SISymbol.T, 1]
+      [SISymbol.t, 1]
     ])),
     Symbol.q,
     "C",
@@ -294,9 +315,9 @@ const unitIdentifiers = [
   // Voltage (electric potential): V = kg·m^2·s^-3·A^-1
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1], 
-      [SISymbol.L, 2], 
-      [SISymbol.T, -3], 
+      [SISymbol.m, 1], 
+      [SISymbol.l, 2], 
+      [SISymbol.t, -3], 
       [SISymbol.I, -1]
     ])),
     Symbol.U,
@@ -308,9 +329,9 @@ const unitIdentifiers = [
   // Electrical capacitance: F = C/V = kg^-1·m^-2·s^4·A^2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, -1],
-      [SISymbol.L, -2],
-      [SISymbol.T, 4],
+      [SISymbol.m, -1],
+      [SISymbol.l, -2],
+      [SISymbol.t, 4],
       [SISymbol.I, 2]
     ])),
     Symbol.C,
@@ -322,9 +343,9 @@ const unitIdentifiers = [
   // Electrical resistance: Ω = V/A = kg·m^2·s^-3·A^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1],
-      [SISymbol.L, 2],
-      [SISymbol.T, -3],
+      [SISymbol.m, 1],
+      [SISymbol.l, 2],
+      [SISymbol.t, -3],
       [SISymbol.I, -2]
     ])),
     Symbol.R,
@@ -336,9 +357,9 @@ const unitIdentifiers = [
   // Electrical conductance: S = 1/Ω = kg^-1·m^-2·s^3·A^2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, -1],
-      [SISymbol.L, -2],
-      [SISymbol.T, 3],
+      [SISymbol.m, -1],
+      [SISymbol.l, -2],
+      [SISymbol.t, 3],
       [SISymbol.I, 2]
     ])),
     Symbol.G,
@@ -350,9 +371,9 @@ const unitIdentifiers = [
   // Magnetic flux: Wb = V·s = kg·m^2·s^-2·A^-1
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1],
-      [SISymbol.L, 2],
-      [SISymbol.T, -2],
+      [SISymbol.m, 1],
+      [SISymbol.l, 2],
+      [SISymbol.t, -2],
       [SISymbol.I, -1]
     ])),
     Symbol.Φ_B,
@@ -364,8 +385,8 @@ const unitIdentifiers = [
   // Magnetic flux density: T = Wb/m^2 = kg·s^-2·A^-1
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1],
-      [SISymbol.T, -2],
+      [SISymbol.m, 1],
+      [SISymbol.t, -2],
       [SISymbol.I, -1]
     ])),
     Symbol.B,
@@ -377,9 +398,9 @@ const unitIdentifiers = [
   // Electrical inductance: H = Wb/A = kg·m^2·s^-2·A^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.M, 1],
-      [SISymbol.L, 2],
-      [SISymbol.T, -2],
+      [SISymbol.m, 1],
+      [SISymbol.l, 2],
+      [SISymbol.t, -2],
       [SISymbol.I, -2]
     ])),
     Symbol.L,
@@ -403,7 +424,7 @@ const unitIdentifiers = [
   new UnitIdentifier(
     new Unit(new Map([
       [SISymbol.J, 1],
-      [SISymbol.L, -2]
+      [SISymbol.l, -2]
     ])),
     Symbol.E_v,
     "lx",
@@ -413,7 +434,7 @@ const unitIdentifiers = [
 
   // Radioactive activity: Bq = s^-1
   new UnitIdentifier(
-    new Unit(new Map([[SISymbol.T, -1]])),
+    new Unit(new Map([[SISymbol.t, -1]])),
     Symbol.A,
     "Bq",
     language === "DE" ? "Becquerel" : "becquerel",
@@ -423,8 +444,8 @@ const unitIdentifiers = [
   // Absorbed dose: Gy = J/kg = m^2·s^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.L, 2],
-      [SISymbol.T, -2]
+      [SISymbol.l, 2],
+      [SISymbol.t, -2]
     ])),
     Symbol.D,
     "Gy",
@@ -435,8 +456,8 @@ const unitIdentifiers = [
   // Equivalent dose: Sv = J/kg = m^2·s^-2
   new UnitIdentifier(
     new Unit(new Map([
-      [SISymbol.L, 2],
-      [SISymbol.T, -2]
+      [SISymbol.l, 2],
+      [SISymbol.t, -2]
     ])),
     Symbol.H,
     "Sv",
@@ -448,7 +469,7 @@ const unitIdentifiers = [
   new UnitIdentifier(
     new Unit(new Map([
       [SISymbol.N, 1],
-      [SISymbol.T, -1]
+      [SISymbol.t, -1]
     ])),
     Symbol.z,
     "kat",
@@ -456,6 +477,30 @@ const unitIdentifiers = [
     language === "DE" ? "Katal" : "katals"
   ), // kat
 ];
+
+const modifiers = new Map([
+  ["y", 1e-24],  // yocto
+  ["z", 1e-21],  // zepto
+  ["a", 1e-18],  // atto
+  ["f", 1e-15],  // femto
+  ["p", 1e-12],  // pico
+  ["n", 1e-9],   // nano
+  ["μ", 1e-6],   // micro
+  ["m", 1e-3],   // milli
+  ["c", 1e-2],   // centi
+  ["d", 1e-1],   // deci
+  ["", 1],
+  ["da", 1e1],   // deka
+  ["h", 1e2],    // hecto
+  ["k", 1e3],    // kilo
+  ["M", 1e6],    // mega
+  ["G", 1e9],    // giga
+  ["T", 1e12],   // tera
+  ["P", 1e15],   // peta
+  ["E", 1e18],   // exa
+  ["Z", 1e21],   // zetta
+  ["Y", 1e24]    // yotta
+]);
 
 // returns the named version of an exponentiated unit
 function exponentiateUnitName(unitName: string, exponent: number): string {
@@ -521,19 +566,35 @@ function getUnitIdentifierByUnit(unit: Unit): UnitIdentifier {
 
 // returns the unitIdentifier object for a given Symbol
 function getUnitIdentifierBySymbol(symbol: SISymbol | Symbol): UnitIdentifier {
-  const result = unitIdentifiers.find((identifier) => identifier.symbol === symbol);
+  const result = unitIdentifiers.concat(SIUnitIdentifiers).find((identifier) => identifier.symbol === symbol);
   if (!result) {
     throw new Error(`No unit matching symbol ${symbol}`);
   }
   return result;
 }
 
-function getUnitIdentifierByShorthand(shorthand: string): UnitIdentifier {
-  const result = unitIdentifiers.find((identifier) => identifier.shorthand === shorthand);
+function getSIUnitIdentifierByShorthand(shorthand: string): SIUnitIdentifier {
+  const result = SIUnitIdentifiers.find((identifier) => identifier.shorthand === shorthand);
   if (!result) {
     throw new Error(`No unit matching shorthand ${shorthand}`);
   }
   return result;
+}
+
+function getUnitIdentifierByShorthand(shorthand: string): UnitIdentifier {
+  const result = (unitIdentifiers.concat(SIUnitIdentifiers)).find((identifier) => identifier.shorthand === shorthand);
+  if (!result) {
+    throw new RangeError(`No unit matching shorthand ${shorthand}`);
+  }
+  return result;
+}
+
+// Helper: Remove zero exponent symbols from a unit
+function fixUnit(unit: Unit): Unit {
+  const symbols = new Map(
+    Array.from(unit.symbols).filter(([_, exponent]) => exponent !== 0)
+  );
+  return new Unit(symbols);
 }
 
 // Helper: Check if two units are equivalent
@@ -549,27 +610,122 @@ function sameUnit(unit1: Unit, unit2: Unit): boolean {
   return true;
 }
 
-export function textToUnit(text: string): Unit {
-  // TODO: add support for modifiers
-  // TODO: add support for composition units
-  return getUnitIdentifierByShorthand(text).unit;
+function getModifierNumAndUnitFromString(input: string): [number, Unit] {
+  let unitIdentifier = null;
+  let lastIndex = null;
+  for (let i = 1; i <= input.length; i++) {
+    try {
+      unitIdentifier = getUnitIdentifierByShorthand(input.slice(-i));
+      lastIndex = -i;
+    } catch(error) {
+      if (error instanceof RangeError) {
+        continue;
+      } else {
+        throw error;
+      }
+    }
+  }
+  if (!unitIdentifier || !lastIndex) {
+    throw new Error(`Could not find any units searching ${input} from right side`);
+  }
+  const modifier = modifiers.get(input.slice(0, lastIndex));
+  if (!modifier) {
+    throw new Error(`Could not find modifier ${input.slice(0, lastIndex)} from input ${input}`);
+  }
+  return [modifier, unitIdentifier.unit];
 }
 
-// Helper: Remove zero exponent symbols from a unit
-function fixUnit(unit: Unit): Unit {
-  const symbols = new Map(
-    Array.from(unit.symbols).filter(([_, exponent]) => exponent !== 0)
-  );
-  return new Unit(symbols);
+function splitProductIntoFactors(product: string): string[] {
+  return product.split("*");
 }
+
+// returns a list [unit, modifier, exponent] for a string being a modified unit
+function getUnitAndFactorFromString(input: string): [Unit, number] {
+  const result = input.split("^");
+  const [ factor, unit ] = getModifierNumAndUnitFromString(result[0]);
+  let exponent = null;
+  switch (result.length) {
+  case 1:
+    exponent = 1;
+    break;
+  case 2:
+    exponent = parseInt(result[1]);
+    break;
+  default:
+    throw new Error(`Invalid input format: ${result.length-1} '^' found in ${input}`);
+  }
+  const finalUnit = unit.exponentiate(exponent);
+  return [finalUnit, factor];
+}
+
+// converts a string form unit to the list [factor, unit]
+function textToFactorAndUnit(text: string): [number, Unit] {
+  // TODO: add support for modifiers
+  // TODO: add support for composition units
+  const splitText = text.split("/");
+  if (splitText.length > 2) {
+    throw new Error("Invalid input format: multiple '/' found");
+  }
+  const numerator = splitText[0].trim();
+  const denominator = splitText.length === 2 ? splitText[1].trim() : null;
+  const numeratorList = splitProductIntoFactors(numerator);
+  const denominatorList = denominator ? splitProductIntoFactors(denominator): null;
+  let finalFactor = 1;
+  let unit = new Unit(dimensionlessUnit.symbols);
+  // add numerator units
+  for (const numeratorFactor of numeratorList) {
+    const [nextUnit, factor] = getUnitAndFactorFromString(numeratorFactor);
+    finalFactor *= factor;
+    unit = unit.multiply(nextUnit);
+  }
+  // add denominator units
+  if (denominatorList){
+    for (const denominatorFactor of denominatorList) {
+      const [nextUnit, factor] = getUnitAndFactorFromString(denominatorFactor);
+      finalFactor /= factor;
+      unit = unit.divide(nextUnit);
+    }
+  }
+
+  return [finalFactor, unit];
+}
+
+// converts a combination of a scalar and a unit to a quantity
+function textToQuantity(text: string): Quantity {
+  let breakIndex = null;
+  text = text.trim();
+  for (let i = 0; i < text.length; i++) {
+    if (!legalNumberChars.includes(text[i])) {
+      breakIndex = i;
+      break;
+    }
+  }
+  if (breakIndex === null) {
+    throw new Error(`Invalid input: could not find a number in the input ${text}`);
+  }
+  const num = Number(text.slice(0, breakIndex));
+  if (isNaN(num)) {
+    throw new Error(`Number not valid ${text.slice(0, breakIndex)} in ${text}`);
+  }
+
+  return new Quantity(text.slice(breakIndex).trim(), num);
+}
+
+export const pseudo = textToQuantity;
 
 export class Quantity {
   unit: Unit;
   value: Vector | Scalar;
 
   constructor(unit: Unit | string, value: Vector | Scalar | number) {
-    this.unit = typeof unit === "string" ? textToUnit(unit) : unit;
-    this.value = typeof(value) === "number" ? new Scalar(value) : value;
+    if (typeof unit === "string") {
+      const [ factor, usedUnit ] = textToFactorAndUnit(unit);
+      this.unit = usedUnit;
+      this.value = typeof(value) === "number" ? new Scalar(factor*value) : value.multiply(new Scalar(factor));
+    } else {
+      this.unit = unit;
+      this.value = typeof(value) === "number" ? new Scalar(value) : value;
+    }
   }
   
   add(quantity2: Quantity) {
