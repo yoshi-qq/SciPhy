@@ -19,8 +19,25 @@ enum SISymbol {
 enum Symbol {
   F = "F", // force
   f = "f", // frequency
-  U = "U", // electric current
+  U = "U", // voltage
+  p = "p", // pressure
+  E = "E", // energy 
+  W = "W", // work
+  P = "P", // power
+  q = "q", // electric charge
+  C = "C", // electrical capacitance
+  R = "R", // electrical resistance
+  G = "G", // electrical conductance
+  Φ_B = "Φ_B", // magnetic flux
+  B = "B", // magnetic flux density
+  L = "L", // electrical inductance
   X = "X", // unknown
+  Φ_v = "Φ_v", // luminous flux
+  E_v = "E_v", // illuminance
+  A = "A", // activity
+  D = "D", // absorbed dose
+  H = "H", // equivalent dose
+  z = "z", // catalytic activity
 }
 
 export const SI = SISymbol;
@@ -129,19 +146,319 @@ class UnitIdentifier {
   }
 }
 
+// list of all symbols, units, and naming for each unit
 const unitIdentifiers = [
-  new UnitIdentifier(new Unit(new Map([[SI.T, 1]])), SI.T, "s", language === "DE" ? "Sekunde" : "second", language === "DE" ? "Sekunden" : "seconds"), // s
-  new UnitIdentifier(new Unit(new Map([[SI.L, 1]])), SI.L, "m", language === "DE" ? "Meter" : "meter", language === "DE" ? "Meter" : "meters"), // m
-  new UnitIdentifier(new Unit(new Map([[SI.M, 1]])), SI.M, "kg", language === "DE" ? "Kilogramm" : "kilogram", language === "DE" ? "Kilogramm" : "kilograms"), // kg
-  new UnitIdentifier(new Unit(new Map([[SI.I, 1]])), SI.I, "A", language === "DE" ? "Ampere" : "ampere", language === "DE" ? "Ampere" : "amperes"), // A
-  new UnitIdentifier(new Unit(new Map([[SI.Θ, 1]])), SI.Θ, "K", language === "DE" ? "Kelvin" : "kelvin", language === "DE" ? "Kelvin" : "kelvins"), // K
-  new UnitIdentifier(new Unit(new Map([[SI.N, 1]])), SI.N, "mol", language === "DE" ? "Mol" : "mole", language === "DE" ? "Mol" : "moles"), // mol
-  new UnitIdentifier(new Unit(new Map([[SI.J, 1]])), SI.J, "cd", language === "DE" ? "Candela" : "candela", language === "DE" ? "Candela" : "candelas"), // cd
-  new UnitIdentifier(new Unit(new Map([[SI.T, -1]])), SY.f, "Hz", language === "DE" ? "Hertz" : "hertz", language === "DE" ? "Hertz" : "hertz"), // Hz
-  new UnitIdentifier(new Unit(new Map([[SI.M, 1], [SI.L, 1], [SI.T, -2]])), SY.F, "N", language === "DE" ? "Newton" : "newton", language === "DE" ? "Newton" : "newtons"), // N
-  new UnitIdentifier(new Unit(new Map([[SI.M, 1], [SI.L, 2], [SI.T, -3], [SI.I, -1]])), SY.U, "V", language === "DE" ? "Volt" : "volt", language === "DE" ? "Volt" : "volts"), // V
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.T, 1]])),
+    SISymbol.T,
+    "s",
+    language === "DE" ? "Sekunde" : "second",
+    language === "DE" ? "Sekunden" : "seconds"
+  ), // s
+
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.L, 1]])),
+    SISymbol.L,
+    "m",
+    language === "DE" ? "Meter" : "meter",
+    language === "DE" ? "Meter" : "meters"
+  ), // m
+
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.M, 1]])),
+    SISymbol.M,
+    "kg",
+    language === "DE" ? "Kilogramm" : "kilogram",
+    language === "DE" ? "Kilogramm" : "kilograms"
+  ), // kg
+
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.I, 1]])),
+    SISymbol.I,
+    "A",
+    language === "DE" ? "Ampere" : "ampere",
+    language === "DE" ? "Ampere" : "amperes"
+  ), // A
+
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.Θ, 1]])),
+    SISymbol.Θ,
+    "K",
+    language === "DE" ? "Kelvin" : "kelvin",
+    language === "DE" ? "Kelvin" : "kelvins"
+  ), // K
+
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.N, 1]])),
+    SISymbol.N,
+    "mol",
+    language === "DE" ? "Mol" : "mole",
+    language === "DE" ? "Mol" : "moles"
+  ), // mol
+
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.J, 1]])),
+    SISymbol.J,
+    "cd",
+    language === "DE" ? "Candela" : "candela",
+    language === "DE" ? "Candela" : "candelas"
+  ), // cd
+
+  // Derived SI units:
+
+  // Frequency: Hz = s^-1
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.T, -1]])),
+    Symbol.f,
+    "Hz",
+    language === "DE" ? "Hertz" : "hertz",
+    language === "DE" ? "Hertz" : "hertz"
+  ), // Hz
+
+  // Force: N = kg·m·s^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1], 
+      [SISymbol.L, 1], 
+      [SISymbol.T, -2]
+    ])),
+    Symbol.F,
+    "N",
+    language === "DE" ? "Newton" : "newton",
+    language === "DE" ? "Newton" : "newtons"
+  ), // N
+
+  // Pressure: Pa = N/m^2 = kg·m^-1·s^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1],
+      [SISymbol.L, -1],
+      [SISymbol.T, -2]
+    ])),
+    Symbol.p, 
+    "Pa",
+    language === "DE" ? "Pascal" : "pascal",
+    language === "DE" ? "Pascal" : "pascals"
+  ), // Pa
+
+  // Energy: J = N·m = kg·m^2·s^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1], 
+      [SISymbol.L, 2], 
+      [SISymbol.T, -2]
+    ])),
+    Symbol.E,
+    "J",
+    language === "DE" ? "Joule" : "joule",
+    language === "DE" ? "Joule" : "joules"
+  ), // J
+
+  // Work: J = N·m = kg·m^2·s^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1],
+      [SISymbol.L, 2],
+      [SISymbol.T, -2]
+    ])),
+    Symbol.W,
+    "J", 
+    language === "DE" ? "Joule" : "joule",
+    language === "DE" ? "Joule" : "joules"
+  ), // J
+
+  // Power: W = J/s = kg·m^2·s^-3
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1], 
+      [SISymbol.L, 2], 
+      [SISymbol.T, -3]
+    ])),
+    Symbol.P,
+    "W",
+    language === "DE" ? "Watt" : "watt",
+    language === "DE" ? "Watt" : "watts"
+  ), // W
+
+  // Electric charge: C = A·s
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.I, 1],
+      [SISymbol.T, 1]
+    ])),
+    Symbol.q,
+    "C",
+    language === "DE" ? "Coulomb" : "coulomb",
+    language === "DE" ? "Coulomb" : "coulombs"
+  ), // C
+
+  // Voltage (electric potential): V = kg·m^2·s^-3·A^-1
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1], 
+      [SISymbol.L, 2], 
+      [SISymbol.T, -3], 
+      [SISymbol.I, -1]
+    ])),
+    Symbol.U,
+    "V",
+    language === "DE" ? "Volt" : "volt",
+    language === "DE" ? "Volt" : "volts"
+  ), // V
+
+  // Electrical capacitance: F = C/V = kg^-1·m^-2·s^4·A^2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, -1],
+      [SISymbol.L, -2],
+      [SISymbol.T, 4],
+      [SISymbol.I, 2]
+    ])),
+    Symbol.C,
+    "F",
+    language === "DE" ? "Farad" : "farad",
+    language === "DE" ? "Farad" : "farads"
+  ), // F
+
+  // Electrical resistance: Ω = V/A = kg·m^2·s^-3·A^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1],
+      [SISymbol.L, 2],
+      [SISymbol.T, -3],
+      [SISymbol.I, -2]
+    ])),
+    Symbol.R,
+    "Ω",
+    language === "DE" ? "Ohm" : "ohm",
+    language === "DE" ? "Ohm" : "ohms"
+  ), // Ω
+
+  // Electrical conductance: S = 1/Ω = kg^-1·m^-2·s^3·A^2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, -1],
+      [SISymbol.L, -2],
+      [SISymbol.T, 3],
+      [SISymbol.I, 2]
+    ])),
+    Symbol.G,
+    "S",
+    language === "DE" ? "Siemens" : "siemens",
+    language === "DE" ? "Siemens" : "siemens"
+  ), // S
+
+  // Magnetic flux: Wb = V·s = kg·m^2·s^-2·A^-1
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1],
+      [SISymbol.L, 2],
+      [SISymbol.T, -2],
+      [SISymbol.I, -1]
+    ])),
+    Symbol.Φ_B,
+    "Wb",
+    language === "DE" ? "Weber" : "weber",
+    language === "DE" ? "Weber" : "webers"
+  ), // Wb
+
+  // Magnetic flux density: T = Wb/m^2 = kg·s^-2·A^-1
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1],
+      [SISymbol.T, -2],
+      [SISymbol.I, -1]
+    ])),
+    Symbol.B,
+    "T",
+    language === "DE" ? "Tesla" : "tesla",
+    language === "DE" ? "Tesla" : "teslas"
+  ), // T
+
+  // Electrical inductance: H = Wb/A = kg·m^2·s^-2·A^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.M, 1],
+      [SISymbol.L, 2],
+      [SISymbol.T, -2],
+      [SISymbol.I, -2]
+    ])),
+    Symbol.L,
+    "H",
+    language === "DE" ? "Henry" : "henry",
+    language === "DE" ? "Henry" : "henrys"
+  ), // H
+
+  // Luminous flux: lm = cd·sr
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.J, 1]  // luminous intensity
+    ])),
+    Symbol.Φ_v,
+    "lm",
+    language === "DE" ? "Lumen" : "lumen",
+    language === "DE" ? "Lumen" : "lumens"
+  ), // lm
+
+  // Illuminance: lx = lm/m^2 => cd·m^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.J, 1],
+      [SISymbol.L, -2]
+    ])),
+    Symbol.E_v,
+    "lx",
+    language === "DE" ? "Lux" : "lux",
+    language === "DE" ? "Lux" : "lux"
+  ), // lx
+
+  // Radioactive activity: Bq = s^-1
+  new UnitIdentifier(
+    new Unit(new Map([[SISymbol.T, -1]])),
+    Symbol.A,
+    "Bq",
+    language === "DE" ? "Becquerel" : "becquerel",
+    language === "DE" ? "Becquerel" : "becquerels"
+  ), // Bq
+
+  // Absorbed dose: Gy = J/kg = m^2·s^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.L, 2],
+      [SISymbol.T, -2]
+    ])),
+    Symbol.D,
+    "Gy",
+    language === "DE" ? "Gray" : "gray",
+    language === "DE" ? "Gray" : "grays"
+  ), // Gy
+
+  // Equivalent dose: Sv = J/kg = m^2·s^-2
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.L, 2],
+      [SISymbol.T, -2]
+    ])),
+    Symbol.H,
+    "Sv",
+    language === "DE" ? "Sievert" : "sievert",
+    language === "DE" ? "Sievert" : "sieverts"
+  ), // Sv
+
+  // Catalytic activity: kat = mol·s^-1
+  new UnitIdentifier(
+    new Unit(new Map([
+      [SISymbol.N, 1],
+      [SISymbol.T, -1]
+    ])),
+    Symbol.z,
+    "kat",
+    language === "DE" ? "Katal" : "katal",
+    language === "DE" ? "Katal" : "katals"
+  ), // kat
 ];
 
+// returns the named version of an exponentiated unit
 function exponentiateUnitName(unitName: string, exponent: number): string {
   switch (exponent) {
   case 1:
@@ -155,6 +472,7 @@ function exponentiateUnitName(unitName: string, exponent: number): string {
   }
 }
 
+// creates a UnitIdentifier on the fly for a composition unit
 function identifyCompositionUnit(unit: Unit): UnitIdentifier {
   let numerator = "";
   const singularNumeratorList = [];
@@ -192,6 +510,7 @@ function identifyCompositionUnit(unit: Unit): UnitIdentifier {
   return new UnitIdentifier(unit, SY.X, shorthand, singular, plural);
 }
 
+// returns the unitIdentifier object for a given Unit
 function getUnitIdentifierByUnit(unit: Unit): UnitIdentifier {
   let result = unitIdentifiers.find((identifier) => sameUnit(identifier.unit, unit));
   if (!result) {
@@ -201,6 +520,7 @@ function getUnitIdentifierByUnit(unit: Unit): UnitIdentifier {
   return result;
 }
 
+// returns the unitIdentifier object for a given Symbol
 function getUnitIdentifierBySymbol(symbol: SISymbol | Symbol): UnitIdentifier {
   const result = unitIdentifiers.find((identifier) => identifier.symbol === symbol);
   if (!result) {
