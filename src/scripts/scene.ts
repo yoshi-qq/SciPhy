@@ -2,13 +2,13 @@ import * as TH from "three";
 import { addDefaultLight, addPointLight } from "./utils/lighting";
 import { createDefaultCamera } from "./utils/camera";
 import { createRenderer } from "./utils/renderer";
-import { initTemplate, tickTemplate } from "./utils/defaultTemplate";
+import { initTemplate, tickTemplate } from "./utils/planets";
 
 // Initialize Scene
 const scene = new TH.Scene();
 const camera = createDefaultCamera();
 addDefaultLight(scene);
-addPointLight(scene);
+// addPointLight(scene);
 const renderer = createRenderer();
 
 // test
