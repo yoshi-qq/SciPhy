@@ -1,6 +1,7 @@
 import { invertMap } from "../utils/utilFunctions";
 
 // TODO: migrate everything to Scalars
+// TODO: add Fahrenheit and Celsius conversion into pseudo
 
 const language = "DE";
 
@@ -143,13 +144,15 @@ const dimensionlessUnit = new Unit(new Map([]));
 
 // Unit name in singular and plural form
 class UnitIdentifier {
+  name: string;
   unit: Unit;
   symbol: SISymbol | Symbol;
   shorthand: string;
   singular: string;
   plural: string;
 
-  constructor(unit: Unit, symbol: SISymbol | Symbol, shorthand: string, singular: string, plural: string) {
+  constructor(name: string, unit: Unit, symbol: SISymbol | Symbol, shorthand: string, singular: string, plural: string) {
+    this.name = name;
     this.unit = unit;
     this.symbol = symbol;
     this.shorthand = shorthand;
@@ -161,8 +164,8 @@ class UnitIdentifier {
 class SIUnitIdentifier extends UnitIdentifier {
   symbol: SISymbol;
 
-  constructor(unit: Unit, symbol: SISymbol, shorthand: string, singular: string, plural: string) {
-    super(unit, symbol, shorthand, singular, plural);
+  constructor(name: string, unit: Unit, symbol: SISymbol, shorthand: string, singular: string, plural: string) {
+    super(name, unit, symbol, shorthand, singular, plural);
     this.symbol = symbol;
   }
 }
@@ -170,6 +173,7 @@ class SIUnitIdentifier extends UnitIdentifier {
 // list of all symbols, units, and naming for each unit
 const SIUnitIdentifiers = [
   new SIUnitIdentifier(
+    "time",
     new Unit(new Map([[SISymbol.t, 1]])),
     SISymbol.t,
     "s",
@@ -178,6 +182,7 @@ const SIUnitIdentifiers = [
   ), // s
 
   new SIUnitIdentifier(
+    "length",
     new Unit(new Map([[SISymbol.l, 1]])),
     SISymbol.l,
     "m",
@@ -186,6 +191,7 @@ const SIUnitIdentifiers = [
   ), // m
 
   new SIUnitIdentifier(
+    "mass",
     new Unit(new Map([[SISymbol.m, 1]])),
     SISymbol.m,
     "kg",
@@ -194,6 +200,7 @@ const SIUnitIdentifiers = [
   ), // kg
 
   new SIUnitIdentifier(
+    "current",
     new Unit(new Map([[SISymbol.I, 1]])),
     SISymbol.I,
     "A",
@@ -202,6 +209,7 @@ const SIUnitIdentifiers = [
   ), // A
 
   new SIUnitIdentifier(
+    "temperature",
     new Unit(new Map([[SISymbol.Θ, 1]])),
     SISymbol.Θ,
     "K",
@@ -210,6 +218,7 @@ const SIUnitIdentifiers = [
   ), // K
 
   new SIUnitIdentifier(
+    "substanceAmount",
     new Unit(new Map([[SISymbol.N, 1]])),
     SISymbol.N,
     "mol",
@@ -218,6 +227,7 @@ const SIUnitIdentifiers = [
   ), // mol
 
   new SIUnitIdentifier(
+    "luminousIntensity",
     new Unit(new Map([[SISymbol.J, 1]])),
     SISymbol.J,
     "cd",
@@ -228,6 +238,7 @@ const SIUnitIdentifiers = [
 const unitIdentifiers = [
   // Frequency: Hz = s^-1
   new UnitIdentifier(
+    "frequency",
     new Unit(new Map([[SISymbol.t, -1]])),
     Symbol.f,
     "Hz",
@@ -237,6 +248,7 @@ const unitIdentifiers = [
 
   // Force: N = kg·m·s^-2
   new UnitIdentifier(
+    "force",
     new Unit(new Map([
       [SISymbol.m, 1], 
       [SISymbol.l, 1], 
@@ -250,6 +262,7 @@ const unitIdentifiers = [
 
   // Pressure: Pa = N/m^2 = kg·m^-1·s^-2
   new UnitIdentifier(
+    "pressure",
     new Unit(new Map([
       [SISymbol.m, 1],
       [SISymbol.l, -1],
@@ -263,6 +276,7 @@ const unitIdentifiers = [
 
   // Energy: J = N·m = kg·m^2·s^-2
   new UnitIdentifier(
+    "energy",
     new Unit(new Map([
       [SISymbol.m, 1], 
       [SISymbol.l, 2], 
@@ -276,6 +290,7 @@ const unitIdentifiers = [
 
   // Work: J = N·m = kg·m^2·s^-2
   new UnitIdentifier(
+    "work",
     new Unit(new Map([
       [SISymbol.m, 1],
       [SISymbol.l, 2],
@@ -289,6 +304,7 @@ const unitIdentifiers = [
 
   // Power: W = J/s = kg·m^2·s^-3
   new UnitIdentifier(
+    "power",
     new Unit(new Map([
       [SISymbol.m, 1], 
       [SISymbol.l, 2], 
@@ -302,6 +318,7 @@ const unitIdentifiers = [
 
   // Electric charge: C = A·s
   new UnitIdentifier(
+    "electricCharge",
     new Unit(new Map([
       [SISymbol.I, 1],
       [SISymbol.t, 1]
@@ -314,6 +331,7 @@ const unitIdentifiers = [
 
   // Voltage (electric potential): V = kg·m^2·s^-3·A^-1
   new UnitIdentifier(
+    "voltage",
     new Unit(new Map([
       [SISymbol.m, 1], 
       [SISymbol.l, 2], 
@@ -328,6 +346,7 @@ const unitIdentifiers = [
 
   // Electrical capacitance: F = C/V = kg^-1·m^-2·s^4·A^2
   new UnitIdentifier(
+    "electricCapacitance",
     new Unit(new Map([
       [SISymbol.m, -1],
       [SISymbol.l, -2],
@@ -342,6 +361,7 @@ const unitIdentifiers = [
 
   // Electrical resistance: Ω = V/A = kg·m^2·s^-3·A^-2
   new UnitIdentifier(
+    "electricalResistance",
     new Unit(new Map([
       [SISymbol.m, 1],
       [SISymbol.l, 2],
@@ -356,6 +376,7 @@ const unitIdentifiers = [
 
   // Electrical conductance: S = 1/Ω = kg^-1·m^-2·s^3·A^2
   new UnitIdentifier(
+    "electricalConductance",
     new Unit(new Map([
       [SISymbol.m, -1],
       [SISymbol.l, -2],
@@ -370,6 +391,7 @@ const unitIdentifiers = [
 
   // Magnetic flux: Wb = V·s = kg·m^2·s^-2·A^-1
   new UnitIdentifier(
+    "magneticFlux",
     new Unit(new Map([
       [SISymbol.m, 1],
       [SISymbol.l, 2],
@@ -384,6 +406,7 @@ const unitIdentifiers = [
 
   // Magnetic flux density: T = Wb/m^2 = kg·s^-2·A^-1
   new UnitIdentifier(
+    "magneticFluxDensity",
     new Unit(new Map([
       [SISymbol.m, 1],
       [SISymbol.t, -2],
@@ -397,6 +420,7 @@ const unitIdentifiers = [
 
   // Electrical inductance: H = Wb/A = kg·m^2·s^-2·A^-2
   new UnitIdentifier(
+    "electricalInductance",
     new Unit(new Map([
       [SISymbol.m, 1],
       [SISymbol.l, 2],
@@ -411,6 +435,7 @@ const unitIdentifiers = [
 
   // Luminous flux: lm = cd·sr
   new UnitIdentifier(
+    "luminousFlux",
     new Unit(new Map([
       [SISymbol.J, 1]  // luminous intensity
     ])),
@@ -422,6 +447,7 @@ const unitIdentifiers = [
 
   // Illuminance: lx = lm/m^2 => cd·m^-2
   new UnitIdentifier(
+    "illuminance",
     new Unit(new Map([
       [SISymbol.J, 1],
       [SISymbol.l, -2]
@@ -434,6 +460,7 @@ const unitIdentifiers = [
 
   // Radioactive activity: Bq = s^-1
   new UnitIdentifier(
+    "radioactiveActivity",
     new Unit(new Map([[SISymbol.t, -1]])),
     Symbol.A,
     "Bq",
@@ -443,6 +470,7 @@ const unitIdentifiers = [
 
   // Absorbed dose: Gy = J/kg = m^2·s^-2
   new UnitIdentifier(
+    "absorbedDose",
     new Unit(new Map([
       [SISymbol.l, 2],
       [SISymbol.t, -2]
@@ -455,6 +483,7 @@ const unitIdentifiers = [
 
   // Equivalent dose: Sv = J/kg = m^2·s^-2
   new UnitIdentifier(
+    "equivalentDose",
     new Unit(new Map([
       [SISymbol.l, 2],
       [SISymbol.t, -2]
@@ -467,6 +496,7 @@ const unitIdentifiers = [
 
   // Catalytic activity: kat = mol·s^-1
   new UnitIdentifier(
+    "catalyticActivity",
     new Unit(new Map([
       [SISymbol.N, 1],
       [SISymbol.t, -1]
@@ -551,7 +581,8 @@ function identifyCompositionUnit(unit: Unit): UnitIdentifier {
     plural += `${divisionSplitter}${singularDenominatorList.join(multiplicationSplitter)}`;
   }
 
-  return new UnitIdentifier(unit, SY.X, shorthand, singular, plural);
+  // TODO: add automatic naming instead of "composition"
+  return new UnitIdentifier("composition", unit, SY.X, shorthand, singular, plural);
 }
 
 // returns the unitIdentifier object for a given Unit
@@ -598,7 +629,7 @@ function fixUnit(unit: Unit): Unit {
 }
 
 // Helper: Check if two units are equivalent
-function sameUnit(unit1: Unit, unit2: Unit): boolean {
+export function sameUnit(unit1: Unit, unit2: Unit): boolean {
   const symbols1 = fixUnit(unit1).symbols;
   const symbols2 = fixUnit(unit2).symbols;
 
@@ -656,6 +687,13 @@ function getUnitAndFactorFromString(input: string): [Unit, number] {
   }
   const finalUnit = unit.exponentiate(exponent);
   return [finalUnit, factor];
+}
+
+// ignores factor
+// TODO: change that
+export function pseudoUnit(input: string): Unit {
+  const [factor, unit] = textToFactorAndUnit(input);
+  return unit;
 }
 
 // converts a string form unit to the list [factor, unit]
