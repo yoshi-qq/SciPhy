@@ -42,7 +42,7 @@ enum Symbol {
 
 export const SI = SISymbol;
 export const SY = Symbol;
-const legalNumberChars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ","];
+const legalNumberChars = ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ",", "e"];
 
 
 const multiplicationSplitter = language === "DE" ? " mal " : " times ";
@@ -94,6 +94,9 @@ export class Vector {
       normalizedVector.direction[i] /= scaling;
     }
     return normalizedVector;
+  }
+  getDirectionalValue(direction: number) {
+    return this.magnitude * this.direction[direction];
   }
   add(vector2: Vector) {
     const newDirection = vector2.direction.map((value, index) => vector2.magnitude * value + this.magnitude * this.direction[index]);
@@ -634,7 +637,6 @@ export function sameUnit(unit1: Unit, unit2: Unit): boolean {
   const symbols2 = fixUnit(unit2).symbols;
 
   if (symbols1.size !== symbols2.size) return false;
-
   for (const [key, value] of symbols1) {
     if (symbols2.get(key) !== value) return false;
   }
@@ -657,7 +659,7 @@ function getModifierNumAndUnitFromString(input: string): [number, Unit] {
     }
   }
   if (!unitIdentifier || !lastIndex) {
-    throw new Error(`Could not find any units searching ${input} from right side`);
+    return [1, new Unit(new Map([]))];
   }
   const modifier = modifiers.get(input.slice(0, lastIndex));
   if (!modifier) {
@@ -795,20 +797,66 @@ export class Quantity {
   multiply(quantity2: Quantity) {
     if (this.value instanceof Scalar && quantity2.value instanceof Scalar) {
       return new Quantity(this.unit.multiply(quantity2.unit), this.value.multiply(quantity2.value));
+    } else if (this.value instanceof Vector && quantity2.value instanceof Scalar) {
+      return new Quantity(this.unit.multiply(quantity2.unit), this.value.multiply(quantity2.value));
     } else if (this.value instanceof Vector && quantity2.value instanceof Vector) {
       throw new Error("Cannot multiply quantities with type Vector");
     } else {
-      throw new Error("Cannot multiply quantities with types Scalar and Vector");
+      throw new Error(`Cannot multiply quantities with types ${typeof this.value} and ${typeof quantity2.value}`);
     }
   }
   
   divide(quantity2: Quantity) {
     if (this.value instanceof Scalar && quantity2.value instanceof Scalar) {
       return new Quantity(this.unit.divide(quantity2.unit), this.value.divide(quantity2.value));
+    } else if (this.value instanceof Vector && quantity2.value instanceof Scalar) {
+      return new Quantity(this.unit.divide(quantity2.unit), this.value.divide(quantity2.value));
     } else if (this.value instanceof Vector && quantity2.value instanceof Vector) {
       throw new Error("Cannot divide quantities with type Vector");
     } else {
-      throw new Error("Cannot divide quantities with types Scalar and Vector");
+      throw new Error(`Cannot divide quantities with types ${typeof this.value} and ${typeof quantity2.value}`);
+    }
+  }
+
+  exponentiate(exponent: Scalar) {
+    if (this.value instanceof Scalar) {
+      return new Quantity(this.unit.exponentiate(exponent.value), this.value.value**exponent.value);
+    } else if (this.value instanceof Vector) {
+      throw new Error("Cannot exponentiate quantities with type and Vector");
+    } else {
+      throw new Error("Cannot exponentiate quantities with unknown type");
+    }
+  }
+
+  getNormalizedQuantity() {
+    if (this.value instanceof Scalar) {
+      return this;
+    } else if (this.value instanceof Vector) {
+      return new Quantity(this.unit, this.value.getNormalizedVector());
+    } else {
+      throw new Error("Cannot normalize quantities with unknown type");
+    }
+  }
+
+  getUnitQuality() {
+    if (this.value instanceof Scalar) {
+      return new Quantity(this.unit, Math.sign(this.value.value));
+    } else if (this.value instanceof Vector) {
+      return new Quantity(this.unit, new Vector(1, this.value.getNormalizedVector().direction));
+    } else {
+      throw new Error("Cannot get unit quality of quantities with unknown type");
+    }
+  }
+
+  getUnitlessQuantity() {
+    return new Quantity(new Unit(new Map([])), this.value);
+  }
+
+  getLength(): Quantity {
+    if (this.value instanceof Scalar) {
+      return this;
+    } else {
+      return new Quantity(this.unit, Math.sqrt(this.value.magnitude * this.value.direction.reduce((acc, curr) => acc + curr ** 2)));
     }
   }
 

@@ -1,1 +1,15 @@
 export const zoom = 1;
+export const scaling = 3e-4;
+export const flip = 1;
+export const tickTime = (60*60*24)/1000;
+export const RED = 0xFF0000;
+export const GREEN = 0x00FF00;
+export const BLUE = 0x0000FF;
+export const BLUEISH = 0x7080F2;
+export const LIGHT_BLUE = 0xD0E6FF;
+export const YELLOW = 0xFFFF00;
+export const ORANGE = 0xFFAA00;
+export const BROWN = 0x9b6044;
+export const BEIGE = 0xD0B996;
+export const WHITEISH = 0xFCF1C3;
+export const GRAY = 0xAAAAAA;

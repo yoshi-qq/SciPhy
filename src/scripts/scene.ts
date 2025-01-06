@@ -12,14 +12,14 @@ addDefaultLight(scene);
 const renderer = createRenderer();
 
 // test
-const objects = initTemplate(scene);
+initTemplate(scene);
 
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
 
   // ticks
-  tickTemplate(objects);
+  tickTemplate();
 
   // Render the scene
   renderer.render(scene, camera);
